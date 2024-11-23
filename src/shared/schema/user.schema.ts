@@ -15,6 +15,15 @@ export class User extends Document {
   @Prop({ required: true, enum: ['admin', 'user'], default: 'user' })
   role: string;
 
+  @Prop({ required: false, default: null })
+  avatar: string;
+
+  @Prop({ required: false, default: null })
+  phone: string;
+
+  @Prop({ required: false, default: 'manual' })
+  accountType: string;
+
   @Prop({ required: false, default: null, select: false })
   refreshToken: string;
 }

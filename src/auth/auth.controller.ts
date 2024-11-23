@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
+import { SocialLoginDto } from './dto/socialLogin.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -95,5 +96,25 @@ export class AuthController {
       success: true,
       message: 'Refresh token successful',
     };
+  }
+
+  @SetMetadata('isPublic', true)
+  @Post('social-login')
+  async socialLogin(
+    @Body() socialLoginDto: SocialLoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const response = await this.authService.socialLogin(socialLoginDto);
+    if (response.success) {
+      res.cookie('_simplestore_access_token', response.access_token, {
+        httpOnly: true,
+        secure: true, // Yêu cầu HTTPS
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 24 * 3 * 60 * 60 * 1000, // Thời gian sống của cookie (3 ngày)
+      });
+    }
+
+    return response;
   }
 }

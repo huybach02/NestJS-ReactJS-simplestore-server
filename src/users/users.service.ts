@@ -29,7 +29,7 @@ export class UsersService {
 
       return {
         success: true,
-        message: 'User created successfully. Please login to continue!',
+        message: 'User created successfully!',
         data: newUser,
       };
     } catch (error) {

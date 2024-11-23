@@ -2,15 +2,19 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { comparePassword } from 'src/helpers/bcrypt';
+import { comparePassword, hashPassword } from 'src/helpers/bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/shared/schema/user.schema';
 import { Request } from 'express';
+import { SocialLoginDto } from './dto/socialLogin.dto';
+import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -114,6 +118,47 @@ export class AuthService {
         'Token không chính xác hoặc đã hết hạn',
         HttpStatus.UNAUTHORIZED,
       );
+    }
+  }
+
+  async socialLogin(socialLoginDto: SocialLoginDto) {
+    const user = await this.usersService.findOneByEmail(socialLoginDto.email);
+    if (!user) {
+      const data = {
+        ...socialLoginDto,
+        password: uuidv4(),
+      };
+
+      const user = await this.usersService.create(data);
+
+      const { access_token, refresh_token } = await this.generateTokens(
+        user.data,
+        '7d',
+      );
+
+      await this.usersService.update(user.data._id.toString(), {
+        refreshToken: refresh_token,
+      });
+
+      return {
+        success: true,
+        message: 'Login successful',
+        data: user.data,
+        access_token,
+      };
+    } else {
+      const { access_token, refresh_token } = await this.generateTokens(user);
+
+      await this.usersService.update(user._id.toString(), {
+        refreshToken: refresh_token,
+      });
+
+      return {
+        success: true,
+        message: 'Login successful',
+        data: user,
+        access_token,
+      };
     }
   }
 
