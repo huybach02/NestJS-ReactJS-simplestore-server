@@ -39,15 +39,14 @@ export class CreateSupplierDto {
   contact: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Transform(({ value }) => Number(value))
-  isTaking: number;
+  @IsString()
+  takingReturn: string;
 
   @IsOptional()
   @IsString()
   photoUrl: string | null;
 
   @IsNotEmpty()
-  @IsBoolean()
-  active: boolean;
+  @IsString()
+  active: string;
 }

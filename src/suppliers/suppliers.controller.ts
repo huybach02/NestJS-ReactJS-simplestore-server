@@ -55,4 +55,9 @@ export class SuppliersController {
   remove(@Param('id') id: string) {
     return this.suppliersService.remove(id);
   }
+
+  @Post('download')
+  download(@Body() exportFields: any) {
+    return this.suppliersService.download(exportFields);
+  }
 }

@@ -1,31 +1,47 @@
 export const brands = [
   {
     name: 'Nike, Inc.',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/2560px-Logo_NIKE.svg.png',
+    url: 'https://loodibee.com/wp-content/uploads/Nike-Logo.png',
   },
   {
     name: 'Adidas AG',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/2560px-Adidas_Logo.svg.png',
+    url: 'https://loodibee.com/wp-content/uploads/Adidas-Logo-Font-Type-300x300.png',
   },
   {
     name: 'Gucci',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/1960s_Gucci_Logo.svg/2560px-1960s_Gucci_Logo.svg.png',
+    url: 'https://inkythuatso.com/uploads/images/2021/11/gucci-logo-inkythuatso-01-02-09-59-44.jpg',
   },
   {
     name: 'Louis Vuitton',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Louis_Vuitton_logo_and_wordmark.svg/2560px-Louis_Vuitton_logo_and_wordmark.svg.png',
+    url: 'https://logo-download.com/wp-content/data/images/svg/Louis-Vuitton-logo.svg',
   },
   {
     name: 'H&M',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/H%26M-Logo.svg/2560px-H&M-Logo.svg.png',
+    url: 'https://www.pngall.com/wp-content/uploads/15/HM-Logo-PNG-Photos.png',
   },
   {
     name: 'Zara',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Zara_Logo.svg/2560px-Zara_Logo.svg.png',
+    url: 'https://static.cdnlogo.com/logos/z/3/zara.png',
   },
   {
     name: 'Uniqlo',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/UNIQLO_logo.svg/2560px-UNIQLO_logo.svg.png',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/UNIQLO_logo.svg/120px-UNIQLO_logo.svg.png',
+  },
+  {
+    name: 'Fila',
+    url: 'https://loodibee.com/wp-content/uploads/Fila-Logo-300x300.png',
+  },
+  {
+    name: 'Reebok',
+    url: 'https://loodibee.com/wp-content/uploads/Reebok-Logo-300x300.png',
+  },
+  {
+    name: 'Puma',
+    url: 'https://loodibee.com/wp-content/uploads/Puma-Logo-300x300.png',
+  },
+  {
+    name: 'Converse',
+    url: 'https://loodibee.com/wp-content/uploads/Converse-Logo-300x300.png',
   },
 ];
 

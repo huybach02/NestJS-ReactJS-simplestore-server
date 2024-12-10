@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { faker } from '@faker-js/faker';
 import { replaceName } from 'src/helpers/replaceName';
 import { brands, fashionProducts } from 'src/helpers/const';
+import { convertTime } from 'src/helpers/convertTime';
 
 @Injectable()
 export class SuppliersService {
@@ -117,9 +118,17 @@ export class SuppliersService {
           categories: [],
           price: Math.floor(faker.number.int({ min: 1, max: 50 })) * 1000000,
           contact: `0${faker.number.int({ min: 32, max: 39 })}${faker.string.numeric(7)}`,
-          isTaking: faker.helpers.arrayElement([0, 1]),
+          takingReturn: faker.helpers.arrayElement([0, 1]),
           photoUrl: brand.url,
           active: faker.helpers.arrayElement([true, false]),
+          createdAt: faker.date.between({
+            from: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 ngày trước
+            to: new Date(),
+          }),
+          updatedAt: faker.date.between({
+            from: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+            to: new Date(),
+          }),
         });
       }
 
@@ -146,5 +155,39 @@ export class SuppliersService {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  async download(exportFields: any) {
+    const { fields, date, isAllDate } = exportFields;
+
+    let suppliers = [];
+    if (isAllDate) {
+      suppliers = await this.supplierModel
+        .find()
+        .select([...fields, 'createdAt', 'updatedAt']);
+    } else {
+      suppliers = await this.supplierModel
+        .find({
+          createdAt: { $gte: date[0], $lte: date[1] },
+        })
+        .select(fields);
+    }
+
+    const data = suppliers.map((supplier, index) => {
+      const { _id, id, ...rest } = supplier.toObject();
+      return {
+        index: index + 1,
+        ...rest,
+        categories: supplier.categories.join(', '),
+      };
+    });
+
+    const total = await this.supplierModel.countDocuments();
+
+    return {
+      success: true,
+      data,
+      total,
+    };
   }
 }
