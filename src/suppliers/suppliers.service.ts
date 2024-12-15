@@ -29,14 +29,16 @@ export class SuppliersService {
     }
   }
 
-  async findAll(page: number, limit: number) {
+  async findAll(page: number, limit: number, query: any) {
     try {
+      const queryObject = query ? JSON.parse(query) : {};
+
       const skip = (page - 1) * limit;
 
       const total = await this.supplierModel.countDocuments();
 
       const suppliers = await this.supplierModel
-        .find()
+        .find(queryObject)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
@@ -105,22 +107,22 @@ export class SuppliersService {
     }
   }
 
-  async fake(count: number) {
+  async fake() {
     try {
       const suppliers = [];
-      for (let i = 0; i < count; i++) {
-        const brand = faker.helpers.arrayElement(brands);
+      brands.forEach((element) => {
         suppliers.push({
-          name: brand.name,
+          name: element.name,
           email: faker.internet.email(),
-          slug: replaceName(brand.name),
-          product: faker.helpers.arrayElement(fashionProducts),
+          slug: replaceName(element.name),
           categories: [],
-          price: Math.floor(faker.number.int({ min: 1, max: 50 })) * 1000000,
           contact: `0${faker.number.int({ min: 32, max: 39 })}${faker.string.numeric(7)}`,
-          takingReturn: faker.helpers.arrayElement([0, 1]),
-          photoUrl: brand.url,
-          active: faker.helpers.arrayElement([true, false]),
+          takingReturn: faker.helpers.arrayElement([
+            'Taking return',
+            'Not taking return',
+          ]),
+          photoUrl: element.url,
+          active: faker.helpers.arrayElement(['Active', 'Inactive']),
           createdAt: faker.date.between({
             from: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 ngày trước
             to: new Date(),
@@ -130,7 +132,7 @@ export class SuppliersService {
             to: new Date(),
           }),
         });
-      }
+      });
 
       // return suppliers;
       await this.supplierModel.insertMany(suppliers);

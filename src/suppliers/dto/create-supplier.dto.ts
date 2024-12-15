@@ -23,30 +23,17 @@ export class CreateSupplierDto {
 
   @IsNotEmpty()
   @IsString()
-  product: string;
-
-  @IsOptional()
-  @IsArray()
-  categories: string[];
-
-  @IsNotEmpty()
-  @IsNumber()
-  @Transform(({ value }) => Number(value))
-  price: number;
-
-  @IsNotEmpty()
-  @IsString()
   contact: string;
 
   @IsNotEmpty()
-  @IsString()
-  takingReturn: string;
+  @IsNumber()
+  takingReturn: number;
 
   @IsOptional()
   @IsString()
   photoUrl: string | null;
 
   @IsNotEmpty()
-  @IsString()
-  active: string;
+  @IsBoolean()
+  active: boolean;
 }

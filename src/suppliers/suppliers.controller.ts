@@ -18,9 +18,9 @@ import { Roles } from 'src/decorators/role.decorator';
 export class SuppliersController {
   constructor(private readonly suppliersService: SuppliersService) {}
 
-  @Get('fake-data/:count')
-  fake(@Param('count') count: string) {
-    return this.suppliersService.fake(+count);
+  @Get('fake-data')
+  fake() {
+    return this.suppliersService.fake();
   }
 
   @Delete('clear-all')
@@ -34,8 +34,12 @@ export class SuppliersController {
   }
 
   @Get()
-  findAll(@Query('page') page: string, @Query('limit') limit: string) {
-    return this.suppliersService.findAll(+page, +limit);
+  findAll(
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query('query') query: any,
+  ) {
+    return this.suppliersService.findAll(+page, +limit, query);
   }
 
   @Get(':id')

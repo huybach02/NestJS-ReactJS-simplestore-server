@@ -11,6 +11,7 @@ import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/permission.guard';
 import { ProductsModule } from './products/products.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     AuthModule,
     ProductsModule,
     SuppliersModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [
