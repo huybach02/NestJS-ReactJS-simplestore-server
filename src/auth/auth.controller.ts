@@ -29,7 +29,7 @@ export class AuthController {
       res.cookie('_simplestore_access_token', registerResponse.access_token, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict',
+        sameSite: 'none',
         path: '/',
         maxAge: 24 * 3 * 60 * 60 * 1000, // Thời gian sống của cookie (3 ngày)
       });
@@ -50,7 +50,7 @@ export class AuthController {
       res.cookie('_simplestore_access_token', loginResponse.access_token, {
         httpOnly: true,
         secure: true, // Yêu cầu HTTPS
-        sameSite: 'strict',
+        sameSite: 'none',
         path: '/',
         maxAge: 24 * 3 * 60 * 60 * 1000, // Thời gian sống của cookie (3 ngày)
       });
@@ -87,7 +87,7 @@ export class AuthController {
     res.cookie('_simplestore_access_token', access_token, {
       httpOnly: true,
       secure: true, // Yêu cầu HTTPS
-      sameSite: 'strict',
+      sameSite: 'none',
       path: '/',
       maxAge: 24 * 3 * 60 * 60 * 1000, // Thời gian sống của cookie (3 ngày)
     });
@@ -109,7 +109,7 @@ export class AuthController {
       res.cookie('_simplestore_access_token', response.access_token, {
         httpOnly: true,
         secure: true, // Yêu cầu HTTPS
-        sameSite: 'strict',
+        sameSite: 'none',
         path: '/',
         maxAge: 24 * 3 * 60 * 60 * 1000, // Thời gian sống của cookie (3 ngày)
       });
