@@ -4,11 +4,13 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Category } from 'src/shared/schema/category.schema';
+import { Product } from 'src/shared/schema/product.schema';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel(Category.name) private categoryModel: Model<Category>,
+    @InjectModel(Product.name) private productModel: Model<Product>,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -49,14 +51,23 @@ export class CategoriesService {
         .skip(skip)
         .limit(limit);
 
-      const categoriesWithNumber = categories.map((category, index) => ({
-        ...category.toObject(),
-        index: skip + index + 1,
-      }));
+      const categoriesWithProductCount = await Promise.all(
+        categories.map(async (category, index) => {
+          const productCount = await this.productModel.countDocuments({
+            category: category._id.toString(),
+          });
+
+          return {
+            ...category.toObject(),
+            index: skip + index + 1,
+            productCount: productCount,
+          };
+        }),
+      );
 
       return {
         success: true,
-        data: categoriesWithNumber,
+        data: categoriesWithProductCount,
         total,
       };
     } catch (error) {
@@ -109,6 +120,20 @@ export class CategoriesService {
     }
   }
 
+  async getCategoryChildren(data: string[], id: string) {
+    const categoryChildren = await this.categoryModel.find({
+      parentId: id,
+    });
+
+    data.push(...categoryChildren.map((child) => child._id.toString()));
+
+    for (const child of categoryChildren) {
+      await this.getCategoryChildren(data, child._id.toString());
+    }
+
+    return data;
+  }
+
   async remove(id: string) {
     try {
       const category = await this.categoryModel.findById(id);
@@ -117,7 +142,13 @@ export class CategoriesService {
         throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
       }
 
+      const categoryChildren = await this.getCategoryChildren([], id);
+
       await this.categoryModel.findByIdAndDelete(id);
+
+      await this.categoryModel.deleteMany({
+        _id: { $in: categoryChildren },
+      });
 
       return {
         success: true,

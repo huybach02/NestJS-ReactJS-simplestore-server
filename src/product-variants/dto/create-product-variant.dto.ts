@@ -9,24 +9,19 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-export class CreateProductDto {
+export class CreateProductVariantDto {
+  @IsNotEmpty()
+  @IsString()
+  productId: string;
+
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @IsNotEmpty()
-  @IsString()
-  slug: string;
+  @IsOptional()
+  @IsArray()
+  sizes: string[];
 
-  @IsNotEmpty()
-  @IsString()
-  sku: string;
-
-  @IsNotEmpty()
-  @IsString()
-  supplier: string;
-
-  @ValidateIf((o) => o.hasVariant === false)
   @IsNotEmpty()
   @IsNumber()
   @Transform(({ value }) => {
@@ -35,7 +30,7 @@ export class CreateProductDto {
   })
   originalPrice: number;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsBoolean()
   hasSale: boolean;
 
@@ -63,10 +58,6 @@ export class CreateProductDto {
   @IsString()
   saleEndDate: string | null | Date;
 
-  @IsNotEmpty()
-  @IsBoolean()
-  hasVariant: boolean;
-
   @ValidateIf((o) => o.hasVariant === false)
   @IsNotEmpty()
   @IsNumber()
@@ -76,29 +67,9 @@ export class CreateProductDto {
   })
   quantity: number;
 
-  @IsNotEmpty()
-  @IsString()
-  category: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  takingReturn: number;
-
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   thumbnail: string;
-
-  @IsOptional()
-  @IsArray()
-  photoUrls: string[] | null;
-
-  @IsNotEmpty()
-  @IsString()
-  description: string;
-
-  @IsOptional()
-  @IsArray()
-  images: string[] | null;
 
   @IsNotEmpty()
   @IsBoolean()

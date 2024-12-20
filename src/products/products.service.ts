@@ -4,23 +4,30 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product } from 'src/shared/schema/product.schema';
 import { Model } from 'mongoose';
+import { ProductVariant } from 'src/shared/schema/productVariant.schema';
+import { handleFilter } from 'src/helpers/handleFilter';
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product>,
+    @InjectModel(ProductVariant.name)
+    private productVariantModel: Model<ProductVariant>,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
     try {
-      if (createProductDto.hasSale) {
-        if (createProductDto.typeSale === 'percentage') {
-          createProductDto.salePrice =
-            createProductDto.originalPrice -
-            (createProductDto.originalPrice * createProductDto.saleValue) / 100;
-        }
-        if (createProductDto.typeSale === 'fixed') {
-          createProductDto.salePrice =
-            createProductDto.originalPrice - createProductDto.saleValue;
+      if (!createProductDto.hasVariant) {
+        if (createProductDto.hasSale) {
+          if (createProductDto.typeSale === 'percentage') {
+            createProductDto.salePrice =
+              createProductDto.originalPrice -
+              (createProductDto.originalPrice * createProductDto.saleValue) /
+                100;
+          }
+          if (createProductDto.typeSale === 'fixed') {
+            createProductDto.salePrice =
+              createProductDto.originalPrice - createProductDto.saleValue;
+          }
         }
       }
 
@@ -36,28 +43,39 @@ export class ProductsService {
     }
   }
 
-  async findAll(page: number, limit: number) {
+  async findAll(page: number, limit: number, filter: any) {
     try {
       const skip = (page - 1) * limit;
 
-      const total = await this.productModel.countDocuments();
+      const { baseQuery, sort } = handleFilter(filter);
+
+      const total = await this.productModel.countDocuments(baseQuery);
 
       const products = await this.productModel
-        .find()
-        .sort({ createdAt: -1 })
+        .find(baseQuery)
+        .sort(sort || { createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('supplier', 'name id')
-        .populate('category', 'name id');
+        .populate('supplier', 'name id slug')
+        .populate('category', 'name id slug');
 
-      const productsWithNumber = products.map((product, index) => ({
-        ...product.toObject(),
-        index: skip + index + 1,
-      }));
+      const productsWithVariant = await Promise.all(
+        products.map(async (product, index) => {
+          const variants = await this.productVariantModel.find({
+            productId: product._id.toString(),
+          });
+
+          return {
+            ...product.toObject(),
+            index: skip + index + 1,
+            variants: variants,
+          };
+        }),
+      );
 
       return {
         success: true,
-        data: productsWithNumber,
+        data: productsWithVariant,
         total,
       };
     } catch (error) {
@@ -77,21 +95,41 @@ export class ProductsService {
         throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
       }
 
-      if (updateProductDto.hasSale) {
-        if (updateProductDto.typeSale === 'percentage') {
-          updateProductDto.salePrice =
-            updateProductDto.originalPrice -
-            (updateProductDto.originalPrice * updateProductDto.saleValue) / 100;
-        }
-        if (updateProductDto.typeSale === 'fixed') {
-          updateProductDto.salePrice =
-            updateProductDto.originalPrice - updateProductDto.saleValue;
+      if (updateProductDto.hasVariant) {
+        updateProductDto.originalPrice = null;
+        updateProductDto.hasSale = null;
+        updateProductDto.typeSale = null;
+        updateProductDto.saleValue = null;
+        updateProductDto.salePrice = null;
+        updateProductDto.saleStartDate = null;
+        updateProductDto.saleEndDate = null;
+        updateProductDto.quantity = null;
+      }
+
+      if (!updateProductDto.hasVariant) {
+        if (updateProductDto.hasSale) {
+          if (updateProductDto.typeSale === 'percentage') {
+            updateProductDto.salePrice =
+              updateProductDto.originalPrice -
+              (updateProductDto.originalPrice * updateProductDto.saleValue) /
+                100;
+          }
+          if (updateProductDto.typeSale === 'fixed') {
+            updateProductDto.salePrice =
+              updateProductDto.originalPrice - updateProductDto.saleValue;
+          }
         }
       }
 
       const updatedProduct = await this.productModel.findByIdAndUpdate(
         id,
-        updateProductDto,
+        {
+          ...updateProductDto,
+          quantity:
+            !product.hasVariant && updateProductDto.hasVariant
+              ? 0
+              : product.quantity,
+        },
         {
           new: true,
         },
@@ -115,7 +153,9 @@ export class ProductsService {
         throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
       }
 
-      await this.productModel.findByIdAndDelete(id);
+      await this.productModel.findByIdAndUpdate(id, {
+        isDeleted: true,
+      });
 
       return {
         success: true,
@@ -167,6 +207,36 @@ export class ProductsService {
       success: true,
       data,
       total,
+    };
+  }
+
+  async actionWhenSelected(data: any) {
+    const { action, ids } = data;
+
+    switch (action) {
+      case 'active-all':
+        await this.productModel.updateMany(
+          { _id: { $in: ids } },
+          { active: true },
+        );
+        break;
+      case 'inactivate-all':
+        await this.productModel.updateMany(
+          { _id: { $in: ids } },
+          { active: false },
+        );
+        break;
+      case 'delete-all':
+        await this.productModel.updateMany(
+          { _id: { $in: ids } },
+          { isDeleted: true },
+        );
+        break;
+    }
+
+    return {
+      success: true,
+      message: 'Action performed successfully!',
     };
   }
 }

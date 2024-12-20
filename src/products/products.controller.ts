@@ -24,8 +24,12 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(@Query('page') page: string, @Query('limit') limit: string) {
-    return this.productsService.findAll(+page, +limit);
+  findAll(
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query('query') query: string,
+  ) {
+    return this.productsService.findAll(+page, +limit, query);
   }
 
   @Get(':id')
@@ -45,8 +49,15 @@ export class ProductsController {
     return this.productsService.remove(id);
   }
 
+  @Roles(['admin'])
   @Post('download')
   download(@Body() exportFields: any) {
     return this.productsService.download(exportFields);
+  }
+
+  @Roles(['admin'])
+  @Post('action-when-selected')
+  actionWhenSelected(@Body() data: any) {
+    return this.productsService.actionWhenSelected(data);
   }
 }

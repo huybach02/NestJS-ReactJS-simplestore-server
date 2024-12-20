@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { format, toZonedTime } from 'date-fns-tz';
-import { Supplier } from './supplier.schema';
-import { Category } from './category.schema';
+import { Product } from './product.schema';
 
 const timeZone = 'Asia/Ho_Chi_Minh';
 
@@ -11,28 +10,24 @@ const timeZone = 'Asia/Ho_Chi_Minh';
   toJSON: { getters: true },
   toObject: { getters: true },
 })
-export class Product extends Document {
+export class ProductVariant extends Document {
+  @Prop({ required: true, type: Types.ObjectId, ref: 'Product' })
+  productId: Types.ObjectId | Product;
+
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
-  slug: string;
-
-  @Prop({ required: true })
-  sku: string;
-
-  @Prop({ type: Types.ObjectId, ref: 'Supplier', required: true })
-  supplier: Types.ObjectId | Supplier;
+  @Prop({ required: false, default: [] })
+  sizes: string[];
 
   @Prop({ required: false, default: null, nullable: true })
   originalPrice: number | null;
 
   @Prop({
-    required: false,
-    default: null,
-    nullable: true,
+    required: true,
+    default: false,
   })
-  hasSale: boolean | null;
+  hasSale: boolean;
 
   @Prop({
     required: false,
@@ -73,38 +68,11 @@ export class Product extends Document {
   })
   saleEndDate: Date | null;
 
-  @Prop({ required: true, default: false })
-  hasVariant: boolean;
+  @Prop({ required: false, default: null, nullable: true })
+  quantity: number | null;
 
-  @Prop({ required: false, default: 0 })
-  quantity: number;
-
-  @Prop({
-    type: Types.ObjectId,
-    ref: 'Category',
-    required: false,
-    nullable: true,
-  })
-  category: Types.ObjectId | Category | null;
-
-  @Prop({
-    required: true,
-    enum: [0, 1],
-    default: 0,
-  })
-  takingReturn: number;
-
-  @Prop({ required: true })
-  thumbnail: string;
-
-  @Prop({ required: false, default: [] })
-  photoUrls: string[];
-
-  @Prop({ required: true })
-  description: string;
-
-  @Prop({ required: false, default: [] })
-  images: string[];
+  @Prop({ required: false, default: null, nullable: true })
+  thumbnail: string | null;
 
   @Prop({
     required: true,
@@ -122,4 +90,5 @@ export class Product extends Document {
   updatedAt: Date;
 }
 
-export const ProductSchema = SchemaFactory.createForClass(Product);
+export const ProductVariantSchema =
+  SchemaFactory.createForClass(ProductVariant);

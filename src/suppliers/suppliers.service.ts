@@ -8,6 +8,7 @@ import { faker } from '@faker-js/faker';
 import { replaceName } from 'src/helpers/replaceName';
 import { brands, fashionProducts } from 'src/helpers/const';
 import { convertTime } from 'src/helpers/convertTime';
+import { handleFilter } from 'src/helpers/handleFilter';
 
 @Injectable()
 export class SuppliersService {
@@ -31,15 +32,17 @@ export class SuppliersService {
 
   async findAll(page: number, limit: number, query: any) {
     try {
-      const queryObject = query ? JSON.parse(query) : {};
-
       const skip = (page - 1) * limit;
+
+      const { baseQuery, sort } = handleFilter(query);
+
+      delete baseQuery.isDeleted;
 
       const total = await this.supplierModel.countDocuments();
 
       const suppliers = await this.supplierModel
-        .find(queryObject)
-        .sort({ createdAt: -1 })
+        .find(baseQuery)
+        .sort(sort || { createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
@@ -190,6 +193,33 @@ export class SuppliersService {
       success: true,
       data,
       total,
+    };
+  }
+
+  async actionWhenSelected(data: any) {
+    const { action, ids } = data;
+
+    switch (action) {
+      case 'active-all':
+        await this.supplierModel.updateMany(
+          { _id: { $in: ids } },
+          { active: true },
+        );
+        break;
+      case 'inactivate-all':
+        await this.supplierModel.updateMany(
+          { _id: { $in: ids } },
+          { active: false },
+        );
+        break;
+      case 'delete-all':
+        await this.supplierModel.deleteMany({ _id: { $in: ids } });
+        break;
+    }
+
+    return {
+      success: true,
+      message: 'Action performed successfully!',
     };
   }
 }

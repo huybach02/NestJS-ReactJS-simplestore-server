@@ -12,6 +12,7 @@ import { RoleGuard } from './auth/guards/permission.guard';
 import { ProductsModule } from './products/products.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ProductVariantsModule } from './product-variants/product-variants.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { CategoriesModule } from './categories/categories.module';
     ProductsModule,
     SuppliersModule,
     CategoriesModule,
+    ProductVariantsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -64,4 +64,10 @@ export class SuppliersController {
   download(@Body() exportFields: any) {
     return this.suppliersService.download(exportFields);
   }
+
+  @Roles(['admin'])
+  @Post('action-when-selected')
+  actionWhenSelected(@Body() data: any) {
+    return this.suppliersService.actionWhenSelected(data);
+  }
 }
