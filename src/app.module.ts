@@ -14,6 +14,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductVariantsModule } from './product-variants/product-variants.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { VouchersModule } from './vouchers/vouchers.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     SuppliersModule,
     CategoriesModule,
     ProductVariantsModule,
+    VouchersModule,
   ],
   controllers: [AppController],
   providers: [

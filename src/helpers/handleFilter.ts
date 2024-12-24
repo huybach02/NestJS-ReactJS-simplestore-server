@@ -4,7 +4,7 @@ export const handleFilter = (filter: any) => {
   const filterConfig: FilterConfig = {
     search: {
       type: 'regex',
-      fields: ['name', 'sku'],
+      fields: ['name', 'sku', 'title'],
     },
     active: {
       type: 'exact',
@@ -19,6 +19,9 @@ export const handleFilter = (filter: any) => {
       type: 'exact',
     },
     supplier: {
+      type: 'exact',
+    },
+    typeDiscount: {
       type: 'exact',
     },
   };

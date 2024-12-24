@@ -26,6 +26,14 @@ export class CreateProductDto {
   @IsString()
   supplier: string;
 
+  @IsNotEmpty()
+  @IsNumber()
+  @Transform(({ value }) => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  })
+  importPrice: number;
+
   @ValidateIf((o) => o.hasVariant === false)
   @IsNotEmpty()
   @IsNumber()

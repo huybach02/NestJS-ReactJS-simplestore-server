@@ -32,6 +32,16 @@ export class ProductVariantsService {
         }
       }
 
+      const startDate = new Date(createProductVariantDto.saleStartDate);
+      const endDate = new Date(createProductVariantDto.saleEndDate);
+
+      if (startDate > endDate) {
+        throw new HttpException(
+          'Start date cannot be greater than End date',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const newProductVariant = await this.productVariantModel.create(
         createProductVariantDto,
       );

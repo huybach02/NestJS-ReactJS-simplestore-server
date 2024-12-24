@@ -31,6 +31,16 @@ export class ProductsService {
         }
       }
 
+      const startDate = new Date(createProductDto.saleStartDate);
+      const endDate = new Date(createProductDto.saleEndDate);
+
+      if (startDate > endDate) {
+        throw new HttpException(
+          'Start date cannot be greater than End date',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const newProduct = await this.productModel.create(createProductDto);
 
       return {

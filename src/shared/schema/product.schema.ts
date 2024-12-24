@@ -24,6 +24,9 @@ export class Product extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Supplier', required: true })
   supplier: Types.ObjectId | Supplier;
 
+  @Prop({ required: true, default: null, nullable: true })
+  importPrice: number | null;
+
   @Prop({ required: false, default: null, nullable: true })
   originalPrice: number | null;
 
@@ -53,7 +56,7 @@ export class Product extends Document {
     nullable: true,
     get: (v: Date) =>
       v
-        ? format(toZonedTime(v, timeZone), 'yyyy-MM-dd HH:mm:ssXXX', {
+        ? format(toZonedTime(v, timeZone), 'yyyy-MM-dd HH:mm:ss', {
             timeZone,
           })
         : null,
@@ -66,7 +69,7 @@ export class Product extends Document {
     nullable: true,
     get: (v: Date) =>
       v
-        ? format(toZonedTime(v, timeZone), 'yyyy-MM-dd HH:mm:ssXXX', {
+        ? format(toZonedTime(v, timeZone), 'yyyy-MM-dd HH:mm:ss', {
             timeZone,
           })
         : null,

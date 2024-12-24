@@ -28,6 +28,14 @@ export class CreateProductVariantDto {
     const num = Number(value);
     return isNaN(num) ? 0 : num;
   })
+  importPrice: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Transform(({ value }) => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  })
   originalPrice: number;
 
   @IsNotEmpty()

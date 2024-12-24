@@ -20,6 +20,9 @@ export class ProductVariant extends Document {
   @Prop({ required: false, default: [] })
   sizes: string[];
 
+  @Prop({ required: true })
+  importPrice: number;
+
   @Prop({ required: false, default: null, nullable: true })
   originalPrice: number | null;
 
@@ -48,7 +51,7 @@ export class ProductVariant extends Document {
     nullable: true,
     get: (v: Date) =>
       v
-        ? format(toZonedTime(v, timeZone), 'yyyy-MM-dd HH:mm:ssXXX', {
+        ? format(toZonedTime(v, timeZone), 'yyyy-MM-dd HH:mm:ss', {
             timeZone,
           })
         : null,
@@ -61,7 +64,7 @@ export class ProductVariant extends Document {
     nullable: true,
     get: (v: Date) =>
       v
-        ? format(toZonedTime(v, timeZone), 'yyyy-MM-dd HH:mm:ssXXX', {
+        ? format(toZonedTime(v, timeZone), 'yyyy-MM-dd HH:mm:ss', {
             timeZone,
           })
         : null,
