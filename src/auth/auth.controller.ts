@@ -25,16 +25,6 @@ export class AuthController {
   ) {
     const registerResponse = await this.authService.register(registerDto);
 
-    if (registerResponse.success) {
-      res.cookie('_simplestore_access_token', registerResponse.access_token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-        maxAge: 24 * 3 * 60 * 60 * 1000, // Thời gian sống của cookie (3 ngày)
-      });
-    }
-
     return registerResponse;
   }
 
@@ -116,5 +106,40 @@ export class AuthController {
     }
 
     return response;
+  }
+
+  @SetMetadata('isPublic', true)
+  @Post('verify-otp')
+  async verifyOtp(
+    @Body() body: { email: string; otp: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const response = await this.authService.verifyOtp(body);
+
+    if (response.success) {
+      res.cookie('_simplestore_access_token', response.access_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+        maxAge: 24 * 3 * 60 * 60 * 1000, // Thời gian sống của cookie (3 ngày)
+      });
+    }
+
+    return response;
+  }
+
+  @SetMetadata('isPublic', true)
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }) {
+    return await this.authService.forgotPassword(body);
+  }
+
+  @SetMetadata('isPublic', true)
+  @Post('reset-password')
+  async resetPassword(
+    @Body() body: { email: string; otp: string; password: string },
+  ) {
+    return await this.authService.resetPassword(body);
   }
 }

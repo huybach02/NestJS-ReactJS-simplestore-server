@@ -23,7 +23,7 @@ export const handleFilter = (filter: any) => {
     },
   };
 
-  const query = buildQuery(JSON.parse(filter), filterConfig);
+  const query = buildQuery(filter ? JSON.parse(filter) : {}, filterConfig);
 
   const { sort, ...rest } = query;
 

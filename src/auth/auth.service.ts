@@ -9,23 +9,25 @@ import { Request } from 'express';
 import { SocialLoginDto } from './dto/socialLogin.dto';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import { MailerService } from '@nestjs-modules/mailer';
+import { sendForgotPasswordEmail, sendUserOtpEmail } from 'src/helpers/mail';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private mailerService: MailerService,
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const user = await this.usersService.create(registerDto);
-    const { access_token, refresh_token } = await this.generateTokens(
-      user.data,
-    );
-
-    await this.usersService.update(user.data._id.toString(), {
-      refreshToken: refresh_token,
+    const user = await this.usersService.create({
+      ...registerDto,
+      otp: Math.floor(100000 + Math.random() * 900000).toString(),
+      otpExpired: new Date(Date.now() + 10 * 60 * 1000),
     });
+
+    sendUserOtpEmail(user.data.email, user.data.otp, this.mailerService);
 
     const userResponse = user.data.toJSON();
     delete userResponse.password;
@@ -33,9 +35,8 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Register successful',
+      message: 'Please check your email to verify your account',
       data: userResponse,
-      access_token,
     };
   }
 
@@ -62,6 +63,26 @@ export class AuthService {
         'Email or password is incorrect',
         HttpStatus.BAD_REQUEST,
       );
+    }
+
+    if (user.role !== 'admin' || user.accountType === 'manual') {
+      if (!user.isVerified) {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
+
+        await this.usersService.update(user._id.toString(), {
+          otp,
+          otpExpired,
+        });
+
+        sendUserOtpEmail(user.email, otp, this.mailerService);
+
+        return {
+          success: false,
+          message: 'Please check your email to verify your account',
+          data: user.toJSON(),
+        };
+      }
     }
 
     const expiresIn = loginDto.remember ? '30d' : '3d';
@@ -96,7 +117,7 @@ export class AuthService {
       );
       if (!user) {
         throw new HttpException(
-          'Token không chính xác hoặc đã hết hạn',
+          'Token is invalid or expired',
           HttpStatus.UNAUTHORIZED,
         );
       }
@@ -107,15 +128,12 @@ export class AuthService {
           return access_token;
         }
       } else {
-        throw new HttpException(
-          'Vui lòng đăng nhập lại',
-          HttpStatus.UNAUTHORIZED,
-        );
+        throw new HttpException('Please login again', HttpStatus.UNAUTHORIZED);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw new HttpException(
-        'Token không chính xác hoặc đã hết hạn',
+        'Token is invalid or expired',
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -160,6 +178,84 @@ export class AuthService {
         access_token,
       };
     }
+  }
+
+  async verifyOtp(body: { email: string; otp: string }) {
+    const user = await this.usersService.findOneByEmail(body.email);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (user.otp !== body.otp) {
+      throw new HttpException('OTP is incorrect', HttpStatus.BAD_REQUEST);
+    }
+
+    if (user.otpExpired < new Date()) {
+      throw new HttpException('OTP has expired', HttpStatus.BAD_REQUEST);
+    }
+
+    const { access_token, refresh_token } = await this.generateTokens(user);
+
+    await this.usersService.update(user._id.toString(), {
+      refreshToken: refresh_token,
+      isVerified: true,
+      otp: null,
+      otpExpired: null,
+    });
+
+    return {
+      success: true,
+      message: 'OTP is correct',
+      data: user,
+      access_token,
+    };
+  }
+
+  async forgotPassword(body: { email: string }) {
+    const user = await this.usersService.findOneByEmail(body.email);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await this.usersService.update(user._id.toString(), {
+      otp,
+      otpExpired: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    sendForgotPasswordEmail(user.email, otp, this.mailerService);
+
+    return {
+      success: true,
+      message: 'Reset password email sent to email',
+    };
+  }
+
+  async resetPassword(body: { email: string; otp: string; password: string }) {
+    const user = await this.usersService.findOneByEmail(body.email);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (user.otp !== body.otp) {
+      throw new HttpException('OTP is incorrect', HttpStatus.BAD_REQUEST);
+    }
+
+    if (user.otpExpired < new Date()) {
+      throw new HttpException('OTP has expired', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.usersService.update(user._id.toString(), {
+      password: await hashPassword(body.password),
+      otp: null,
+      otpExpired: null,
+    });
+
+    return {
+      success: true,
+      message: 'Password reset successful. Please login again.',
+    };
   }
 
   async generateTokens(user: User, expiresIn: string = '3d') {
