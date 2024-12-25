@@ -7,8 +7,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    // origin: 'https://nest-js-react-js-simplestore-admin.vercel.app',
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: 'https://nest-js-react-js-simplestore-admin.vercel.app',
+    // origin: ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
