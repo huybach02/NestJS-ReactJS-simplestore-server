@@ -10,5 +10,6 @@ import { Voucher, VoucherSchema } from 'src/shared/schema/voucher';
   ],
   controllers: [VouchersController],
   providers: [VouchersService],
+  exports: [VouchersService],
 })
 export class VouchersModule {}

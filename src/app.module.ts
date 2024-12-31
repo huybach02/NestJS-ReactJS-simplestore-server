@@ -15,6 +15,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { ProductVariantsModule } from './product-variants/product-variants.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { VouchersModule } from './vouchers/vouchers.module';
+import { CartsModule } from './carts/carts.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -72,6 +74,8 @@ import { VouchersModule } from './vouchers/vouchers.module';
     CategoriesModule,
     ProductVariantsModule,
     VouchersModule,
+    CartsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [

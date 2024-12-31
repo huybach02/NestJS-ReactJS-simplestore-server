@@ -65,6 +65,15 @@ export class Voucher extends Document {
   })
   active: boolean;
 
+  @Prop({ required: false, default: [] })
+  userUsage: string[];
+
+  @Prop({ required: false, default: [] })
+  pending: {
+    userId: string;
+    expireAt: Date;
+  }[];
+
   @Prop({ required: false, default: false })
   isDeleted: boolean;
 

@@ -36,6 +36,31 @@ export class VouchersService {
     }
   }
 
+  async findAllWithActive() {
+    try {
+      const now = new Date();
+
+      const vouchers = await this.voucherModel
+        .find({
+          active: true,
+          isDeleted: false,
+          startDate: { $lte: now },
+          endDate: { $gte: now },
+        })
+        .sort({ createdAt: -1 })
+        .select(
+          'code title valueDiscount typeDiscount minAmountOfOrder maxDiscount',
+        );
+
+      return {
+        success: true,
+        data: vouchers,
+      };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async findAll(page: number, limit: number, query: any) {
     try {
       const skip = (page - 1) * limit;
@@ -65,8 +90,16 @@ export class VouchersService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} voucher`;
+  findOne(code: string, select?: string) {
+    return this.voucherModel
+      .findOne({ code, isDeleted: false, active: true })
+      .select(select);
+  }
+
+  findOneById(id: string, select?: string) {
+    return this.voucherModel
+      .findOne({ _id: id, isDeleted: false, active: true })
+      .select(select);
   }
 
   async update(id: string, updateVoucherDto: UpdateVoucherDto) {

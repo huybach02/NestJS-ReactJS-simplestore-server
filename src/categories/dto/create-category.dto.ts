@@ -11,6 +11,10 @@ export class CreateCategoryDto {
 
   @IsOptional()
   @IsString()
+  thumbnail: string;
+
+  @IsOptional()
+  @IsString()
   parentId: string;
 
   @IsNotEmpty()

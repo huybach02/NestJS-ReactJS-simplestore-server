@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
 import { sendForgotPasswordEmail, sendUserOtpEmail } from 'src/helpers/mail';
+import { CartsService } from 'src/carts/carts.service';
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,6 +19,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailerService: MailerService,
+    private cartsService: CartsService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -32,6 +34,10 @@ export class AuthService {
     const userResponse = user.data.toJSON();
     delete userResponse.password;
     delete userResponse.refreshToken;
+
+    await this.cartsService.createCart({
+      userId: user.data._id.toString(),
+    });
 
     return {
       success: true,
@@ -156,6 +162,10 @@ export class AuthService {
 
       await this.usersService.update(user.data._id.toString(), {
         refreshToken: refresh_token,
+      });
+
+      await this.cartsService.createCart({
+        userId: user.data._id.toString(),
       });
 
       return {

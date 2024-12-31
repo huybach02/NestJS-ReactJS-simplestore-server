@@ -93,8 +93,97 @@ export class ProductsService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async bestSelling(limit: number) {
+    const products = await this.productModel
+      .find({ active: true, isDeleted: false })
+      .sort({ soldQuantity: -1 })
+      .limit(limit || 12)
+      .populate('supplier', 'name id slug')
+      .populate('category', 'name id slug');
+
+    const productsWithVariants = await Promise.all(
+      products.map(async (product) => {
+        const variants = await this.productVariantModel.find({
+          productId: product._id.toString(),
+          active: true,
+          isDeleted: false,
+        });
+
+        return {
+          ...product.toObject(),
+          variants: variants,
+        };
+      }),
+    );
+
+    return {
+      success: true,
+      data: productsWithVariants,
+    };
+  }
+
+  async findOne(slug: string) {
+    try {
+      const product = await this.productModel
+        .findOne({ slug, active: true, isDeleted: false })
+        .populate('supplier', 'name id slug')
+        .populate('category', 'name id slug');
+
+      const variants = await this.productVariantModel.find({
+        productId: product._id.toString(),
+        active: true,
+        isDeleted: false,
+      });
+
+      if (!product) {
+        throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+      }
+
+      return {
+        success: true,
+        data: {
+          ...product.toObject(),
+          variants: variants,
+        },
+      };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getProductById(id: string, select?: string) {
+    try {
+      const product = await this.productModel
+        .findOne({ _id: id, active: true, isDeleted: false })
+        .populate('supplier', 'name id slug')
+        .populate('category', 'name id slug')
+        .select(select);
+
+      if (!product) {
+        return {
+          success: false,
+          data: null,
+        };
+      }
+
+      return {
+        success: true,
+        data: product,
+      };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async findVariantOfProduct(id: string) {
+    const variants = await this.productVariantModel.find({
+      productId: id,
+    });
+
+    return {
+      success: true,
+      data: variants,
+    };
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {

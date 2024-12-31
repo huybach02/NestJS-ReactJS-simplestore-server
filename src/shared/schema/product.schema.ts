@@ -103,11 +103,17 @@ export class Product extends Document {
   @Prop({ required: false, default: [] })
   photoUrls: string[];
 
+  @Prop({ required: false, default: null, nullable: true })
+  shortDescription: string | null;
+
   @Prop({ required: true })
   description: string;
 
   @Prop({ required: false, default: [] })
   images: string[];
+
+  @Prop({ required: false, default: 0 })
+  soldQuantity: number;
 
   @Prop({
     required: true,

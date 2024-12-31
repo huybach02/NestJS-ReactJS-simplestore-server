@@ -30,7 +30,7 @@ export class ProductVariantsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productVariantsService.findOne(+id);
+    return this.productVariantsService.findOne(id);
   }
 
   @Patch(':id')

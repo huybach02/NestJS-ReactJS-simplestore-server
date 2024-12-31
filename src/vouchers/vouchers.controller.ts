@@ -32,9 +32,14 @@ export class VouchersController {
     return this.vouchersService.findAll(+page, +limit, query);
   }
 
+  @Get('active')
+  findAllWithActive() {
+    return this.vouchersService.findAllWithActive();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.vouchersService.findOne(+id);
+    return this.vouchersService.findOne(id);
   }
 
   @Roles(['admin'])

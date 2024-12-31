@@ -100,6 +100,10 @@ export class CreateProductDto {
   @IsArray()
   photoUrls: string[] | null;
 
+  @IsOptional()
+  @IsString()
+  shortDescription: string | null;
+
   @IsNotEmpty()
   @IsString()
   description: string;

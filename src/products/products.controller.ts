@@ -34,9 +34,21 @@ export class ProductsController {
     return this.productsService.findAll(+page, +limit, query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
+  @SetMetadata('isPublic', true)
+  @Get('best-selling')
+  bestSelling(@Query('limit') limit: string) {
+    return this.productsService.bestSelling(+limit);
+  }
+
+  @SetMetadata('isPublic', true)
+  @Get(':slug')
+  findOne(@Param('slug') slug: string) {
+    return this.productsService.findOne(slug);
+  }
+
+  @Get(':id/variants')
+  findVariantOfProduct(@Param('id') id: string) {
+    return this.productsService.findVariantOfProduct(id);
   }
 
   @Roles(['admin'])

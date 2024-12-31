@@ -17,5 +17,6 @@ import { Product, ProductSchema } from 'src/shared/schema/product.schema';
   ],
   controllers: [ProductVariantsController],
   providers: [ProductVariantsService],
+  exports: [ProductVariantsService],
 })
 export class ProductVariantsModule {}

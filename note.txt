@@ -1,3 +1,51 @@
 tk mongodb: dowegol289@cashbn.com    hj9-LKKB7_RinpJ
 
 tk user mongodb: dowegol289    u9Mdwpvp94Gse2qF
+
+tk paypal: simplestorepaypal@gmail.com       simplestorepaypal
+
+
+
+
+
+=== QUY TRÌNH XỬ LÝ VOUCHER ===
+
+1. Người dùng A sử dụng voucher:
+   - Lấy danh sách sản phẩm chọn mua trong giỏ hàng
+   - Tính tổng tiền đơn hàng của các sản phẩm đã chọn
+
+2. Kiểm tra tính hợp lệ của voucher:
+   - Xác minh voucher có tồn tại?
+   - Kiểm tra thời hạn sử dụng: start_date ≤ current_time ≤ end_date
+   - Kiểm tra số lần sử dụng của người dùng A < số lần dùng tối đa/người
+
+3. Xử lý lock voucher:
+   - Xóa các lock không còn hiệu lực
+   - Ghi chú: Lock đại diện cho trạng thái (slot) voucher đang được giữ tạm thời
+     * Thời gian lock: vd 15 phút
+     * Nếu không thanh toán trong thời gian lock
+     * Hệ thống tự động giải phóng voucher (coi như họ chưa dùng voucher này)
+
+4. Kiểm tra xem voucher này đang được sử dụng bởi người dùng A hay không?
+   - Nếu đang được sử dụng => báo lỗi "You are using this voucher" tránh việc spam
+   - Nếu đang không được sử dụng => tiếp tục xử lý
+
+5. Kiểm tra tổng số lượng sử dụng (đã dùng thành công + đang lock)
+   - Nếu đã đạt số lượng tối đa => báo lỗi "Voucher has reached maximum usage"
+   - Nếu không đạt số lượng tối đa => tiếp tục xử lý
+
+6. Kiểm tra giá trị đơn hàng tối thiểu
+   - Nếu đơn hàng không đạt giá trị tối thiểu vd: $100 => báo lỗi "Order total must be at least $100"
+   - Nếu đơn hàng đạt giá trị tối thiểu => tiếp tục xử lý
+
+7. Tạo lock mới
+   - Thời gian lock: vd 15 phút
+   - Nếu không thanh toán trong thời gian lock => hệ thống tự động giải phóng voucher (coi như họ chưa dùng voucher này)
+
+8. Tính toán số tiền giảm
+   - Nếu voucher có loại giảm theo % => tính toán số tiền giảm và so sánh với số tiền giảm tối đa của voucher
+   - Nếu voucher có loại giảm theo số tiền => tính toán số tiền giảm và so sánh với số tiền giảm tối đa của voucher
+
+9. Cập nhật lại số tiền còn lại của voucher
+
+10. Trả về kết quả

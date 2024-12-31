@@ -16,6 +16,9 @@ export class Category extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Category', required: false })
   parentId: Types.ObjectId;
 
+  @Prop({ required: false, default: null, nullable: true })
+  thumbnail: string | null;
+
   @Prop({
     required: true,
     default: true,
