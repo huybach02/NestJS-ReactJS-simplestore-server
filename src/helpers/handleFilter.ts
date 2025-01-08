@@ -4,7 +4,7 @@ export const handleFilter = (filter: any) => {
   const filterConfig: FilterConfig = {
     search: {
       type: 'regex',
-      fields: ['name', 'sku', 'title'],
+      fields: ['name', 'sku', 'title', 'invoiceId', 'userId.name'],
     },
     active: {
       type: 'exact',
@@ -22,6 +22,15 @@ export const handleFilter = (filter: any) => {
       type: 'exact',
     },
     typeDiscount: {
+      type: 'exact',
+    },
+    paymentMethod: {
+      type: 'exact',
+    },
+    paymentStatus: {
+      type: 'exact',
+    },
+    orderStatus: {
       type: 'exact',
     },
   };

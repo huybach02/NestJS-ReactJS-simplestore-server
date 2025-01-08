@@ -175,6 +175,35 @@ export class ProductsService {
     }
   }
 
+  async getRelatedProduct(categoryId: string) {
+    const products = await this.productModel
+      .find({ category: categoryId, active: true, isDeleted: false })
+      .limit(6)
+      .sort({ createdAt: -1 })
+      .populate('supplier', 'name id slug')
+      .populate('category', 'name id slug');
+
+    const productsWithVariants = await Promise.all(
+      products.map(async (product) => {
+        const variants = await this.productVariantModel.find({
+          productId: product._id.toString(),
+          active: true,
+          isDeleted: false,
+        });
+
+        return {
+          ...product.toObject(),
+          variants: variants,
+        };
+      }),
+    );
+
+    return {
+      success: true,
+      data: productsWithVariants,
+    };
+  }
+
   async findVariantOfProduct(id: string) {
     const variants = await this.productVariantModel.find({
       productId: id,

@@ -24,7 +24,7 @@ export class Product extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Supplier', required: true })
   supplier: Types.ObjectId | Supplier;
 
-  @Prop({ required: true, default: null, nullable: true })
+  @Prop({ required: false, default: null, nullable: true })
   importPrice: number | null;
 
   @Prop({ required: false, default: null, nullable: true })

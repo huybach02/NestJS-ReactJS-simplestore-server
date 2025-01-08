@@ -50,8 +50,6 @@ export const buildQuery = (filter: any, config: FilterConfig) => {
         const match = filter[key].split('_');
         const [field, operator, value] = match;
 
-        console.log(field, operator, value);
-
         // Xử lý các toán tử so sánh
         const compareOperators: { [key: string]: string } = {
           eq: '$eq',

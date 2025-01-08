@@ -142,4 +142,24 @@ export class AuthController {
   ) {
     return await this.authService.resetPassword(body);
   }
+
+  @Post('update-profile')
+  async updateProfile(
+    @Body() body: { name: string; phone: string; avatar: string },
+    @Req() req: Request,
+  ) {
+    return await this.authService.updateProfile(body, req['user']._id);
+  }
+
+  @Post('change-password')
+  async changePassword(
+    @Body()
+    body: {
+      oldPassword: string;
+      newPassword: string;
+    },
+    @Req() req: Request,
+  ) {
+    return await this.authService.changePassword(body, req['user']._id);
+  }
 }

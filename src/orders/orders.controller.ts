@@ -64,18 +64,34 @@ export class OrdersController {
   }
 
   @Get()
-  findAll() {
-    return this.ordersService.findAll();
+  findAll(
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query('query') query: any,
+  ): Promise<{
+    success: boolean;
+    data: any;
+    total: number;
+  }> {
+    return this.ordersService.findAll(+page, +limit, query);
+  }
+
+  @Get('customer-order')
+  getCustomerOrder(@Req() req: Request) {
+    return this.ordersService.getCustomerOrder(req['user']._id);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
+    return this.ordersService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(+id, updateOrderDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateOrderDto: { orderStatus: string },
+  ) {
+    return this.ordersService.update(id, updateOrderDto);
   }
 
   @Delete(':id')

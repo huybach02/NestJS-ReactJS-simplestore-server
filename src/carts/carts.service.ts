@@ -404,9 +404,9 @@ export class CartsService {
     }
   }
 
-  async removePendingLock(voucherCode: string, userId: string) {
+  async removePendingLock(userId: string) {
     await this.voucherModel.updateOne(
-      { code: voucherCode },
+      { userId },
       {
         $pull: {
           pending: { userId },

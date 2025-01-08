@@ -11,6 +11,8 @@ import { Address } from 'src/shared/schema/address.schema';
 import { AddressDto } from './dto/address.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Order } from 'src/shared/schema/order.schema';
+import { handleFilter } from 'src/helpers/handleFilter';
+import { User } from 'src/shared/schema/user.schema';
 
 @Injectable()
 export class OrdersService {
@@ -21,6 +23,7 @@ export class OrdersService {
     @InjectModel(CartTemp.name) private cartTempModel: Model<CartTemp>,
     @InjectModel(Address.name) private addressModel: Model<Address>,
     @InjectModel(Order.name) private orderModel: Model<Order>,
+    @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: string) {
@@ -30,8 +33,6 @@ export class OrdersService {
       const { token, paymentMethod, paymentStatus } = createOrderDto;
 
       const decodedToken = this.jwtService.verify(token);
-
-      console.log(decodedToken.sub, userId);
 
       if (!decodedToken || decodedToken.sub.toString() !== userId.toString()) {
         throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
@@ -62,11 +63,17 @@ export class OrdersService {
         await this.cartsService.removeFromCart(product.id, userId);
       }
 
+      if (order.voucher) {
+        await this.cartsService.confirmVoucherUsage(order.voucher.code, userId);
+      }
+
       return {
         success: true,
         data: order,
       };
     } catch (error) {
+      await this.cartsService.removePendingLock(userId);
+
       throw new HttpException(
         'Something went wrong! Please try again.',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -220,7 +227,9 @@ export class OrdersService {
   }
 
   async getAddress(userId: string) {
-    const address = await this.addressModel.find({ userId });
+    const address = await this.addressModel
+      .find({ userId })
+      .sort({ createdAt: -1 });
     return {
       success: true,
       data: address,
@@ -293,16 +302,87 @@ export class OrdersService {
     };
   }
 
-  findAll() {
-    return `This action returns all orders`;
+  async findAll(page: number, limit: number, query: any) {
+    try {
+      const skip = (page - 1) * limit;
+
+      const { baseQuery, sort } = handleFilter(query);
+
+      delete baseQuery.isDeleted;
+
+      if (query && JSON.parse(query).search) {
+        const searchValue = JSON.parse(query).search;
+        const usersWithName = await this.userModel
+          .find({
+            name: { $regex: searchValue, $options: 'i' },
+          })
+          .collation({ locale: 'vi', strength: 1 })
+          .select('_id');
+
+        baseQuery.$or = [
+          { invoiceId: { $regex: searchValue, $options: 'i' } },
+          { userId: { $in: usersWithName.map((user) => user._id) } },
+        ];
+      }
+
+      const total = await this.orderModel.countDocuments(baseQuery);
+
+      const orders = await this.orderModel
+        .find(baseQuery)
+        .sort(sort || { createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('userId');
+
+      const ordersWithNumber = orders.map((order, index) => ({
+        ...order.toObject(),
+        index: skip + index + 1,
+      }));
+
+      return {
+        success: true,
+        data: ordersWithNumber,
+        total,
+      };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async getCustomerOrder(userId: string) {
+    const orders = await this.orderModel
+      .find({ userId })
+      .sort({ createdAt: -1 });
+    return {
+      success: true,
+      data: orders,
+    };
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async findOne(id: string) {
+    const order = await this.orderModel.findById(id);
+    return {
+      success: true,
+      data: order,
+    };
+  }
+
+  async update(id: string, updateOrderDto: { orderStatus: string }) {
+    if (updateOrderDto.orderStatus === 'completed') {
+      await this.orderModel.findByIdAndUpdate(id, {
+        $set: {
+          orderStatus: updateOrderDto.orderStatus,
+          paymentStatus: 'success',
+        },
+      });
+    } else {
+      await this.orderModel.findByIdAndUpdate(id, updateOrderDto);
+    }
+
+    return {
+      success: true,
+      message: 'Order updated successfully',
+    };
   }
 
   remove(id: number) {

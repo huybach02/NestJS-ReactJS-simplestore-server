@@ -268,6 +268,60 @@ export class AuthService {
     };
   }
 
+  async updateProfile(
+    body: { name: string; phone: string; avatar: string },
+    id: string,
+  ) {
+    const user = await this.usersService.update(id, {
+      name: body.name,
+      phone: body.phone,
+      avatar: body.avatar,
+    });
+
+    return {
+      success: true,
+      message: 'Profile updated successfully',
+      data: user,
+    };
+  }
+
+  async changePassword(
+    body: { oldPassword: string; newPassword: string },
+    id: string,
+  ) {
+    const user = await this.usersService.findOneById(id, '+password');
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const isPasswordValid = await comparePassword(
+      body.oldPassword,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new HttpException(
+        'Old password is incorrect',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    try {
+      await this.usersService.update(id, {
+        password: await hashPassword(body.newPassword),
+      });
+    } catch (error) {
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return {
+      success: true,
+      message: 'Password changed successfully',
+    };
+  }
+
   async generateTokens(user: User, expiresIn: string = '3d') {
     const payload = { sub: user._id, email: user.email, role: user.role };
     const access_token = await this.jwtService.signAsync(payload);

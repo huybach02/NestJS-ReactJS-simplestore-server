@@ -41,6 +41,12 @@ export class ProductsController {
   }
 
   @SetMetadata('isPublic', true)
+  @Get('related/:categoryId')
+  getRelatedProduct(@Param('categoryId') categoryId: string) {
+    return this.productsService.getRelatedProduct(categoryId);
+  }
+
+  @SetMetadata('isPublic', true)
   @Get(':slug')
   findOne(@Param('slug') slug: string) {
     return this.productsService.findOne(slug);

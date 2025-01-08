@@ -17,6 +17,10 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { CartsModule } from './carts/carts.module';
 import { OrdersModule } from './orders/orders.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { WishlistsModule } from './wishlists/wishlists.module';
+import { ManageWebsiteModule } from './manage-website/manage-website.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -76,6 +80,10 @@ import { OrdersModule } from './orders/orders.module';
     VouchersModule,
     CartsModule,
     OrdersModule,
+    ReviewsModule,
+    WishlistsModule,
+    ManageWebsiteModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [

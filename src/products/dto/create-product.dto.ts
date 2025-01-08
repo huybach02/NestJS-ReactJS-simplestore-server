@@ -26,7 +26,7 @@ export class CreateProductDto {
   @IsString()
   supplier: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   @Transform(({ value }) => {
     const num = Number(value);

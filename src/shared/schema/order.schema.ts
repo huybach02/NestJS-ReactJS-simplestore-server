@@ -3,7 +3,7 @@ import mongoose, { Document } from 'mongoose';
 import { Product } from './product.schema';
 import { Voucher } from './voucher';
 
-interface CartProduct {
+export interface CartProduct {
   id: string;
   product: any;
   hasVariant: boolean;
