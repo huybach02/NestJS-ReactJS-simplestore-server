@@ -24,6 +24,26 @@ export class VouchersService {
         );
       }
 
+      if (createVoucherDto.typeDiscount == 'percentage') {
+        if (createVoucherDto.valueDiscount > 100) {
+          throw new HttpException(
+            'Value discount cannot be greater than 100%',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+
+      const voucher = await this.voucherModel.findOne({
+        code: createVoucherDto.code,
+        isDeleted: false,
+      });
+      if (voucher) {
+        throw new HttpException(
+          'Voucher already exists',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const newVoucher = await this.voucherModel.create(createVoucherDto);
 
       return {

@@ -301,6 +301,9 @@ export class CartsService {
         voucherData.maxDiscount,
       );
     }
+    if (discountAmount > totalPrice) {
+      discountAmount = totalPrice;
+    }
 
     return {
       success: true,
